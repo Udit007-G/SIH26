@@ -70,7 +70,8 @@ Smart-India-Hackathon/
 ├── process_indices.py        # Sentinel-2 → NDVI / NDMI rasters
 ├── view_rgb.py               # Sentinel-2 → true-colour composite
 ├── requirements.txt            # Backend runtime deps (what Vercel installs)
-├── requirements-ui.txt         # Extra deps for dashboard.py / raster scripts
+├── requirements-ui.txt         # Extra deps for dashboard.py
+├── requirements-raster.txt     # Optional GDAL/PROJ deps for the raster scripts
 ├── run.bat / run.ps1         # One-shot launcher (Windows)
 └── data/                     # Sentinel-2 .jp2 bands (git-ignored)
 ```
@@ -123,6 +124,67 @@ Manual start:
 python -m uvicorn backend.mock_api:app --reload --port 8000
 streamlit run dashboard.py --server.port 8501
 ```
+
+---
+
+## Deployment
+
+The system is two processes with different hosting constraints. **The backend
+is on Vercel; the dashboard must be hosted separately**, because Vercel runs
+each deployment as a serverless function and Streamlit needs a persistent
+process with WebSocket support.
+
+| Component | Entry file | Host |
+|---|---|---|
+| FastAPI backend | `index.py` | Vercel |
+| Streamlit dashboard | `dashboard.py` | Streamlit Community Cloud |
+
+### Backend → Vercel
+
+Vercel auto-detects a FastAPI app named `app` at a root entrypoint
+(`app.py`, `index.py`, `main.py`, `server.py`, `wsgi.py`, `asgi.py`).
+`index.py` is a one-line re-export of the real app:
+
+```python
+from backend.mock_api import app
+```
+
+Nothing else is required. Two things to know:
+
+- **Do not** put the FastAPI app in `api/index.py`. Vercel treats files under
+  `/api` as *file-based* functions served at their file path, so `api/index.py`
+  serves only `/api` and every `/api/v1/*` route 404s.
+- `requirements.txt` must stay lean. Vercel does not tree-shake Python and
+  bundles every listed package (limit ~500 MB), so the geospatial and
+  Streamlit packages live in separate files.
+
+### Dashboard → Streamlit Community Cloud
+
+1. Push the repo to GitHub, then **Share → Deploy to Streamlit Cloud**.
+2. Under **Advanced settings**, set:
+
+   | Setting | Value |
+   |---|---|
+   | Main file path | `dashboard.py` |
+   | Requirements file | `requirements-ui.txt` |
+   | Python version | 3.11 or newer |
+
+3. Under **Settings → Secrets**, add:
+
+   | Key | Value |
+   |---|---|
+   | `BACKEND_URL` | your Vercel deployment root, e.g. `https://<project>.vercel.app` |
+
+   No trailing slash. `dashboard.py` reads this and falls back to
+   `http://localhost:8000` when unset, so local runs are unaffected.
+
+### Dependencies at a glance
+
+| File | Contents | Installed by |
+|---|---|---|
+| `requirements.txt` | `fastapi`, `uvicorn`, `pydantic`, `numpy` | Vercel |
+| `requirements-ui.txt` | `streamlit`, `folium`, `plotly`, `matplotlib`, `scikit-learn`, `joblib` | Streamlit Cloud, local |
+| `requirements-raster.txt` | `rasterio`, `geopandas` (need GDAL/PROJ) | local only, optional |
 
 ---
 
