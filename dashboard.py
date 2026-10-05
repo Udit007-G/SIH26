@@ -12,7 +12,7 @@ import glob as glib
 
 st.set_page_config(page_title="Manganese Explorer", layout="wide")
 
-BACKEND = "http://localhost:8000"
+BACKEND = os.environ.get("BACKEND_URL", "http://localhost:8000")
 
 # Get data (cached - only fetched once)
 @st.cache_data(ttl=300)
@@ -159,7 +159,7 @@ with col1:
     m = folium.Map(location=[21.8, 80.18], zoom_start=11, tiles="OpenStreetMap")
 
     if show_heat and grid:
-        cm = LinearColormap(["blue", "cyan", "yellow", "orange", "red"], 0, 1)
+        cm = LinearColormap(["blue", "cyan", "yellow", "orange", "red"], vmin=0, vmax=1)
         for cell in grid:
             if cell["score"] > 0.3:
                 folium.CircleMarker(

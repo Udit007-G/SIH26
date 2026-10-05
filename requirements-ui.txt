@@ -1,0 +1,21 @@
+# Local development / Streamlit Cloud deployment.
+#   pip install -r requirements.txt -r requirements-ui.txt
+#
+# requirements.txt holds the FastAPI backend deps (and is what Vercel
+# installs). Everything below is only needed to run dashboard.py or the
+# optional satellite scripts process_indices.py and view_rgb.py.
+streamlit>=1.28.0
+streamlit-folium>=0.15.0
+folium>=0.14.0
+branca>=0.6.0
+plotly>=5.17.0
+pandas>=2.1.0
+requests>=2.31.0
+matplotlib>=3.7.0
+scikit-learn>=1.6.1
+joblib>=1.3.0
+
+# Optional -- only for process_indices.py / view_rgb.py, which also need
+# the Sentinel-2 bands in data/ (not committed to the repo).
+rasterio>=1.3.0
+geopandas>=0.14.0

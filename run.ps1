@@ -9,7 +9,7 @@ $backend = Start-Process -FilePath "python" -ArgumentList "-m", "uvicorn", "back
 Start-Sleep -Seconds 3
 
 Write-Host "[2/2] Starting Streamlit Dashboard on port 8501..." -ForegroundColor Yellow
-$frontend = Start-Process -FilePath "streamlit" -ArgumentList "run", "app.py", "--server.port", "8501" -PassThru -WorkingDirectory $PSScriptRoot
+$frontend = Start-Process -FilePath "streamlit" -ArgumentList "run", "dashboard.py", "--server.port", "8501" -PassThru -WorkingDirectory $PSScriptRoot
 
 Write-Host ""
 Write-Host "============================================" -ForegroundColor Green

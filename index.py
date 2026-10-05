@@ -1,0 +1,1 @@
+from backend.mock_api import app  # noqa: F401

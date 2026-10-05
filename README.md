@@ -60,7 +60,8 @@ Holdout results measured on `test_set_20.csv` (52 samples):
 
 ```
 Smart-India-Hackathon/
-├── app.py                    # Streamlit dashboard (frontend)
+├── index.py                    # Vercel entrypoint (re-exports the FastAPI app)
+├── dashboard.py                # Streamlit dashboard (frontend)
 ├── backend/
 │   └── mock_api.py           # FastAPI service (port 8000)
 ├── sih_manganese_model.pkl   # Trained RandomForest (joblib)
@@ -68,7 +69,8 @@ Smart-India-Hackathon/
 ├── bharweli_aoi.geojson      # Area of interest boundary
 ├── process_indices.py        # Sentinel-2 → NDVI / NDMI rasters
 ├── view_rgb.py               # Sentinel-2 → true-colour composite
-├── requirements.txt
+├── requirements.txt            # Backend runtime deps (what Vercel installs)
+├── requirements-ui.txt         # Extra deps for dashboard.py / raster scripts
 ├── run.bat / run.ps1         # One-shot launcher (Windows)
 └── data/                     # Sentinel-2 .jp2 bands (git-ignored)
 ```
@@ -100,7 +102,7 @@ git clone https://github.com/Udit007-G/Smart-India-Hackathon.git
 cd Smart-India-Hackathon
 python -m venv .venv
 .venv\Scripts\activate          # Windows  (source .venv/bin/activate on macOS/Linux)
-pip install -r requirements.txt
+pip install -r requirements.txt -r requirements-ui.txt
 ```
 
 Then either double-click **`run.bat`**, or:
@@ -119,7 +121,7 @@ Manual start:
 
 ```bash
 python -m uvicorn backend.mock_api:app --reload --port 8000
-streamlit run app.py --server.port 8501
+streamlit run dashboard.py --server.port 8501
 ```
 
 ---
@@ -209,7 +211,7 @@ Download imagery from the
 - `sih_manganese_model.pkl` was written with scikit-learn 1.6.1. Newer versions
   emit an `InconsistentVersionWarning` on load — harmless, but retrain if you
   hit a real incompatibility.
-- The model file is picked up by `glob("*.pkl")` in `app.py:260`, so keep a
+- The model file is picked up by `glob("*.pkl")` in `dashboard.py:260`, so keep a
   single `.pkl` in the project root.
 
 ---

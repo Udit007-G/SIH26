@@ -11,7 +11,7 @@ start "Backend API" cmd /k "cd /d %~dp0 && python -m uvicorn backend.mock_api:ap
 timeout /t 3 /nobreak >nul
 
 echo [2/2] Starting Streamlit Dashboard on port 8501...
-start "Streamlit Dashboard" cmd /k "cd /d %~dp0 && streamlit run app.py --server.port 8501"
+start "Streamlit Dashboard" cmd /k "cd /d %~dp0 && streamlit run dashboard.py --server.port 8501"
 
 echo.
 echo ============================================
